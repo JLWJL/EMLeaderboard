@@ -1,4 +1,5 @@
 ﻿using EMLeaderboard.Controllers;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EMLeaderboard.UnitTests.Controllers;
 
@@ -22,7 +23,8 @@ public class LeaderboardControllerTest
         var result = _leaderboardController.UpdateScore(customerId, scoreChange);
 
         //Assert
-        Assert.IsType<decimal>(result);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.IsType<decimal>(okResult.Value);
     }
 
     [Theory]
@@ -38,23 +40,24 @@ public class LeaderboardControllerTest
         var result = _leaderboardController.UpdateScore(customerId, score);
 
         // Assert
-        Assert.Equal(1000m, result);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.Equal(1000m, okResult.Value);
     }
 
     [Theory]
     [InlineData(-1001)]
     [InlineData(1001)]
-    public void UpdateScore_WithInvalidScore_ThrowsArgumentOutOfRangeException(decimal score)
+    public void UpdateScore_WithInvalidScore_ReturnsBadRequest(decimal score)
     {
         // Arrange
         const long customerId = 1;
 
-        // Act & Assert
-        var exception = Assert.Throws<ArgumentOutOfRangeException>(() => 
-            _leaderboardController.UpdateScore(customerId, score));
-        
-        Assert.Equal("score", exception.ParamName);
-        Assert.Contains("Score must be between -1000 and 1000", exception.Message);
+        // Act
+        var result = _leaderboardController.UpdateScore(customerId, score);
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+        Assert.Contains("Score must be between -1000 and 1000", badRequestResult.Value!.ToString());
     }
 
     
