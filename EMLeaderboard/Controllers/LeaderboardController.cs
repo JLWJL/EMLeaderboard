@@ -1,3 +1,4 @@
+using EMLeaderboard.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EMLeaderboard.Controllers;
@@ -22,4 +23,18 @@ public class LeaderboardController : ControllerBase
         
         return Ok(1000m);
     }
+
+    [HttpGet]
+    [Route("")]
+    public ActionResult<List<Customer>> GetCustomersByRank([FromQuery] int start, [FromQuery] int end)
+    {
+        if (start < 0 || end < 0 || start > end)
+        {
+            return BadRequest("Invalid start or end");
+        }
+
+        return Ok(new List<Customer>());
+    }
+
+
 }
