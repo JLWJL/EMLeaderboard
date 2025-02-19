@@ -1,0 +1,6 @@
+@EMLeaderboard_HostAddress = http://localhost:5077
+
+GET {{EMLeaderboard_HostAddress}}/
+Accept: application/json
+
+###
