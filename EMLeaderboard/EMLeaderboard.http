@@ -1,6 +1,10 @@
 @EMLeaderboard_HostAddress = http://localhost:5077
 
-GET {{EMLeaderboard_HostAddress}}/
+POST {{EMLeaderboard_HostAddress}}/customer/11111/score/1000
 Accept: application/json
 
 ###
+GET {{EMLeaderboard_HostAddress}}/leaderboard?start=1&end=10
+
+###
+GET {{EMLeaderboard_HostAddress}}/leaderboard/11111?high=2&low=4

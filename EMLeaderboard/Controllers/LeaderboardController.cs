@@ -36,5 +36,15 @@ public class LeaderboardController : ControllerBase
         return Ok(new List<Customer>());
     }
 
+    [HttpGet]
+    [Route("{customerId}")]
+    public ActionResult<List<Customer>> GetCustomersById([FromRoute] long customerId, [FromQuery] decimal? high = 0, [FromQuery] decimal? low = 0)
+    {
+        if(high < 0 || low < 0 )
+        {
+            return BadRequest("{high} and {low} must be greater than 0");
+        }
 
+        return Ok(new List<Customer>());
+    }
 }

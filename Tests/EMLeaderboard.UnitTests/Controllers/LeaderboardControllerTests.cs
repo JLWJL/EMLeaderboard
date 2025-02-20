@@ -16,8 +16,8 @@ public class LeaderboardControllerTest
     [Fact]
     public void UpdateScore_ReturnsCurrentScoreOfDecimalType()
     {
-        //Arrange
         const long customerId = 111111111;
+        //Arrange
         const decimal scoreChange = 100;
         
         //Act
@@ -35,7 +35,7 @@ public class LeaderboardControllerTest
     public void UpdateScore_WithValidScore_ReturnsExpectedScore(decimal score)
     {
         // Arrange
-        const long customerId = 1;
+        const long customerId = 111111111;
 
         // Act
         var result = _leaderboardController.UpdateScore(customerId, score);
@@ -51,7 +51,7 @@ public class LeaderboardControllerTest
     public void UpdateScore_WithInvalidScore_ReturnsBadRequest(decimal score)
     {
         // Arrange
-        const long customerId = 1;
+        const long customerId = 111111111;
 
         // Act
         var result = _leaderboardController.UpdateScore(customerId, score);
@@ -77,9 +77,9 @@ public class LeaderboardControllerTest
     }
 
     [Theory]
-    [InlineData(-1, 10)]    // negative start
-    [InlineData(0, -1)]     // negative end
-    [InlineData(10, 5)]     // start greater than end
+    [InlineData(-1, 10)]
+    [InlineData(0, -1)]
+    [InlineData(10, 5)]
     public void GetCustomersByRank_WithInvalidRange_ReturnsBadRequest(int start, int end)
     {
         // Act
@@ -88,5 +88,34 @@ public class LeaderboardControllerTest
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
         Assert.Contains("Invalid start or end", badRequestResult.Value!.ToString());
+    }
+
+    [Theory]
+    [InlineData(111111111, 0, 0)]
+    [InlineData(111111111, 100, 50)]
+    [InlineData(111111111, 1000, 0)]
+    public void GetCustomersById_WithValidParameters_ReturnsOkResult(long customerId, decimal high, decimal low)
+    {
+        // Act
+        var result = _leaderboardController.GetCustomersById(customerId, high, low);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var customers = Assert.IsType<List<Customer>>(okResult.Value);
+        Assert.NotNull(customers);
+    }
+
+    [Theory]
+    [InlineData(111111111, -1, 0)]
+    [InlineData(111111111, 0, -1)]
+    [InlineData(111111111, -10, -5)]
+    public void GetCustomersById_WithNegativeRanges_ReturnsBadRequest(long customerId, decimal high, decimal low)
+    {
+        // Act
+        var result = _leaderboardController.GetCustomersById(customerId, high, low);
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+        Assert.Contains("must be greater than 0", badRequestResult.Value!.ToString());
     }
 }
