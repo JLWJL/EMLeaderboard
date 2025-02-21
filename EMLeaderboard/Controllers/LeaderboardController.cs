@@ -16,6 +16,11 @@ public class LeaderboardController : ControllerBase
     [Route("~/customer/{customerId}/score/{score}")]
     public ActionResult<decimal> UpdateScore([FromRoute] long customerId, [FromRoute] decimal score)
     {
+        if(customerId < 1)
+        {
+            return BadRequest("Customer ID must be greater than 0");
+        }
+
         if(score < -1000 || score > 1000)
         {
             return BadRequest("Score must be between -1000 and 1000");

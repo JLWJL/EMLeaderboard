@@ -27,6 +27,22 @@ public class LeaderboardControllerTest
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         Assert.IsType<decimal>(okResult.Value);
     }
+    
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void UpdateScore_WithInvalidCustomerId_ReturnsBadRequest(long customerId)
+    {
+        // Arrange
+        const decimal scoreChange = 100;
+
+        // Act
+        var result = _leaderboardController.UpdateScore(customerId, scoreChange);
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+        Assert.Equal("Customer ID must be greater than 0", badRequestResult.Value!.ToString());
+    }
 
     [Theory]
     [InlineData(-1000)]
