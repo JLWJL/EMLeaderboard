@@ -73,7 +73,7 @@ public class LeaderboardServicesTests
     public async Task GetCustomersByRank_WhenNoCustomers_ShouldReturnEmptyList()
     {
         //Act
-        var result = await _leaderboardService.GetCustomersByRank(100,300);
+        var result = await _leaderboardService.GetCustomersByRankAsync(100,300);
 
         //Assert
         Assert.Empty(result);
@@ -87,7 +87,7 @@ public class LeaderboardServicesTests
         _leaderboardService = new LeaderboardService(shuffledCustomers);
 
         //Act
-        var result = await _leaderboardService.GetCustomersByRank();
+        var result = await _leaderboardService.GetCustomersByRankAsync();
 
         //Assert
         Assert.Equal(10, result.Count);
@@ -111,7 +111,7 @@ public class LeaderboardServicesTests
         _leaderboardService = new LeaderboardService(shuffledCustomers);
 
         //Act
-        var result = await _leaderboardService.GetCustomersByRank(start);
+        var result = await _leaderboardService.GetCustomersByRankAsync(start);
 
         //Assert
         Assert.Equal(10, result.Count);
@@ -136,7 +136,7 @@ public class LeaderboardServicesTests
         _leaderboardService = new LeaderboardService(shuffledCustomers);
 
         //Act
-        var result = await _leaderboardService.GetCustomersByRank(start, 30);
+        var result = await _leaderboardService.GetCustomersByRankAsync(start, 30);
         
         //Assert
         Assert.Equal(18, result.Count);
@@ -157,7 +157,7 @@ public class LeaderboardServicesTests
         _leaderboardService = new LeaderboardService(customersBuilder);
 
         //Act
-        var result = await _leaderboardService.GetCustomersByRank(3, 10);
+        var result = await _leaderboardService.GetCustomersByRankAsync(3, 10);
         var equalScoreCustomers = result.Where(x => x.Score == 6).ToList();
 
         //Assert
@@ -175,7 +175,7 @@ public class LeaderboardServicesTests
     public async Task GetCustomersById_WhenCustomerIdIsNotFound_ShouldThrowCustomerNotFoundException()
     {
         //Act & Assert
-        await Assert.ThrowsAsync<CustomerNotFoundException>(() => _leaderboardService.GetCustomersById(123));        
+        await Assert.ThrowsAsync<CustomerNotFoundException>(() => _leaderboardService.GetCustomersByIdAsync(123));        
     }
 
     [Fact]
@@ -186,7 +186,7 @@ public class LeaderboardServicesTests
         _leaderboardService = new LeaderboardService(shuffledCustomers);
         
         //Act
-        var result = await _leaderboardService.GetCustomersById(10, 3, 5);
+        var result = await _leaderboardService.GetCustomersByIdAsync(10, 3, 5);
         
         //Assert
         Assert.Equal(6, result.Count);
@@ -204,7 +204,7 @@ public class LeaderboardServicesTests
         _leaderboardService = new LeaderboardService(shuffledCustomers);
         
         //Act
-        var result = await _leaderboardService.GetCustomersById(1, 3, 5);
+        var result = await _leaderboardService.GetCustomersByIdAsync(1, 3, 5);
         
         //Assert
         Assert.Equal(4, result.Count);
@@ -222,7 +222,7 @@ public class LeaderboardServicesTests
         _leaderboardService = new LeaderboardService(shuffledCustomers);
         
         //Act
-        var result = await _leaderboardService.GetCustomersById(6, 8, 2);
+        var result = await _leaderboardService.GetCustomersByIdAsync(6, 8, 2);
         
         //Assert
         Assert.Equal(7, result.Count);
@@ -240,7 +240,7 @@ public class LeaderboardServicesTests
         _leaderboardService = new LeaderboardService(shuffledCustomers);
         
         //Act
-        var result = await _leaderboardService.GetCustomersById(2, 2, 5);
+        var result = await _leaderboardService.GetCustomersByIdAsync(2, 2, 5);
         
         //Assert
         Assert.Equal(4, result.Count);
@@ -258,7 +258,7 @@ public class LeaderboardServicesTests
         _leaderboardService = new LeaderboardService(shuffledCustomers);
         
         //Act
-        var result = await _leaderboardService.GetCustomersById(8, 3, 5);
+        var result = await _leaderboardService.GetCustomersByIdAsync(8, 3, 5);
         
         //Assert
         Assert.Equal(9, result.Count);
