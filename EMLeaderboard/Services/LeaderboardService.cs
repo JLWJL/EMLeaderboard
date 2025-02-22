@@ -66,8 +66,37 @@ public class LeaderboardService : ILeaderboardService
 
     public Task<List<CustomerScoreRank>> GetCustomersByRank(int start = 1, int? end = null)
     {
-        // Method implementation goes here
-        throw new NotImplementedException();
+        //Assumption: if start and end are missing, retrieve top 10 customers
+        if(end is null || end < start){
+            end = start + 9;
+        }
+
+        _lock.EnterReadLock();
+        try{
+            var currentIndex = 1;
+            var customerScoreRanks = new List<CustomerScoreRank>();
+
+            foreach(var customer in _sortedCustomers){
+                if(currentIndex >= start && currentIndex <= end){
+                    customerScoreRanks.Add(new CustomerScoreRank{
+                        CustomerId = customer.CustomerId,
+                        Score = customer.Score,
+                        Rank = currentIndex
+                    });
+                }
+
+                if(currentIndex == end){
+                    break;
+                }
+
+                currentIndex++;
+            }
+
+            return Task.FromResult(customerScoreRanks);
+        }
+        finally{
+            _lock.ExitReadLock();
+        }
     }
 
     public Task<List<CustomerScoreRank>> GetCustomersById(long customerId, decimal? high, decimal? low)
