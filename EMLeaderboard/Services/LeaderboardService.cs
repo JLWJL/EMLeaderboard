@@ -53,7 +53,7 @@ public class LeaderboardService : ILeaderboardService
 
     }
 
-    public Task<List<CustomerScoreRank>> GetCustomersByRank(int? start, int? end)
+    public Task<List<CustomerScoreRank>> GetCustomersByRank(int start = 1, int? end = null)
     {
         // Method implementation goes here
         throw new NotImplementedException();
