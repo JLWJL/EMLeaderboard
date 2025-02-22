@@ -149,5 +149,23 @@ public class LeaderboardServicesTests
         Assert.Equal(1, result.Last().Score);
         Assert.Equal(20, result.Last().Rank);
     }
+    [Fact]
+    public async Task GetCustomersByRank_WhenMultipleCustomersEqualScore_ShouldReturnSortedById(){
+        //Arrange
+        var customersBuilder = new ShuffledCustomersBuilder().WithNCustomers(10).WithNEqualScoreCustomers(5, 6).Build();
+        _leaderboardService = new LeaderboardService(customersBuilder);
+
+        //Act
+        var result = await _leaderboardService.GetCustomersByRank(3, 10);
+        var equalScoreCustomers = result.Where(x => x.Score == 6).ToList();
+
+        //Assert
+        Assert.Equal(8, result.Count);
+
+        for(var i = 1; i < equalScoreCustomers.Count; i++){
+            Assert.True(equalScoreCustomers[i-1].CustomerId < equalScoreCustomers[i].CustomerId);
+        }
+    }
+    #endregion
     #endregion
 }
