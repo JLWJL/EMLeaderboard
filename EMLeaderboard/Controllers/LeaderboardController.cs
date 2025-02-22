@@ -1,4 +1,5 @@
 using EMLeaderboard.Models;
+using EMLeaderboard.Contracts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EMLeaderboard.Controllers;
@@ -7,14 +8,16 @@ namespace EMLeaderboard.Controllers;
 [Route("[controller]")]
 public class LeaderboardController : ControllerBase
 {
-    public LeaderboardController()
+    private readonly ILeaderboardService _leaderboardService;
+
+    public LeaderboardController(ILeaderboardService leaderboardService)
     {
-        
+        _leaderboardService = leaderboardService;
     }
 
     [HttpPost]
     [Route("~/customer/{customerId}/score/{score}")]
-    public ActionResult<decimal> UpdateScore([FromRoute] long customerId, [FromRoute] decimal score)
+    public async Task<ActionResult<decimal>> UpdateScore([FromRoute] long customerId, [FromRoute] decimal score)
     {
         if(customerId < 1)
         {
@@ -25,31 +28,38 @@ public class LeaderboardController : ControllerBase
         {
             return BadRequest("Score must be between -1000 and 1000");
         }
+
+        var result = await _leaderboardService.UpdateScoreAsync(customerId, score);
         
-        return Ok(1000m);
+        return Ok(result);
     }
 
     [HttpGet]
     [Route("")]
-    public ActionResult<List<Customer>> GetCustomersByRank([FromQuery] int start, [FromQuery] int end)
+    //TODO: return type is {customerid, score, rank}
+    public async Task<ActionResult<List<CustomerScoreRank>>> GetCustomersByRank([FromQuery] int start, [FromQuery] int end)
     {
         if (start < 0 || end < 0 || start > end)
         {
             return BadRequest("Invalid start or end");
         }
 
-        return Ok(new List<Customer>());
+        var result = await _leaderboardService.GetCustomersByRankAsync(start, end);
+
+        return Ok(result);
     }
 
     [HttpGet]
     [Route("{customerId}")]
-    public ActionResult<List<Customer>> GetCustomersById([FromRoute] long customerId, [FromQuery] decimal? high = 0, [FromQuery] decimal? low = 0)
+    public async Task<ActionResult<List<Customer>>> GetCustomersById([FromRoute] long customerId, [FromQuery] int high = 0, [FromQuery] int low = 0)
     {
         if(high < 0 || low < 0 )
         {
             return BadRequest("{high} and {low} must be greater than 0");
         }
 
-        return Ok(new List<Customer>());
+        var result = await _leaderboardService.GetCustomersByIdAsync(customerId, high, low);
+
+        return Ok(result);
     }
 }
