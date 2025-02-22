@@ -83,8 +83,8 @@ public class LeaderboardServicesTests
     public async Task GetCustomersByRank_WhenNoStartOrEnd_ShouldReturnTop10()
     {
         //Arrange
-        var customersBuilder = new ShuffledCustomersBuilder().WithNCustomers(50).Build();
-        _leaderboardService = new LeaderboardService(customersBuilder);
+        var shuffledCustomers = new ShuffledCustomersBuilder().WithNCustomers(50).Build();
+        _leaderboardService = new LeaderboardService(shuffledCustomers);
 
         //Act
         var result = await _leaderboardService.GetCustomersByRank();
@@ -107,8 +107,8 @@ public class LeaderboardServicesTests
         var totalCustomers = 20;
         var start = 3;
         
-        var customersBuilder = new ShuffledCustomersBuilder().WithNCustomers(totalCustomers).Build();
-        _leaderboardService = new LeaderboardService(customersBuilder);
+        var shuffledCustomers = new ShuffledCustomersBuilder().WithNCustomers(totalCustomers).Build();
+        _leaderboardService = new LeaderboardService(shuffledCustomers);
 
         //Act
         var result = await _leaderboardService.GetCustomersByRank(start);
@@ -132,8 +132,8 @@ public class LeaderboardServicesTests
         var totalCustomers = 20;
         var start = 3;
         
-        var customersBuilder = new ShuffledCustomersBuilder().WithNCustomers(totalCustomers).Build();
-        _leaderboardService = new LeaderboardService(customersBuilder);
+        var shuffledCustomers = new ShuffledCustomersBuilder().WithNCustomers(totalCustomers).Build();
+        _leaderboardService = new LeaderboardService(shuffledCustomers);
 
         //Act
         var result = await _leaderboardService.GetCustomersByRank(start, 30);
@@ -149,6 +149,7 @@ public class LeaderboardServicesTests
         Assert.Equal(1, result.Last().Score);
         Assert.Equal(20, result.Last().Rank);
     }
+
     [Fact]
     public async Task GetCustomersByRank_WhenMultipleCustomersEqualScore_ShouldReturnSortedById(){
         //Arrange
@@ -167,5 +168,106 @@ public class LeaderboardServicesTests
         }
     }
     #endregion
+
+    #region GetCustomersById
+
+    [Fact]
+    public async Task GetCustomersById_WhenCustomerIdIsNotFound_ShouldThrowCustomerNotFoundException()
+    {
+        //Act & Assert
+        await Assert.ThrowsAsync<CustomerNotFoundException>(() => _leaderboardService.GetCustomersById(123));        
+    }
+
+    [Fact]
+    public async Task GetCustomersById_WhenCustomersIsTheFirst_ShouldNotHaveHigherNeighbours()
+    {
+        //Arrange
+        var shuffledCustomers = new ShuffledCustomersBuilder().WithNCustomers(10).Build();
+        _leaderboardService = new LeaderboardService(shuffledCustomers);
+        
+        //Act
+        var result = await _leaderboardService.GetCustomersById(10, 3, 5);
+        
+        //Assert
+        Assert.Equal(6, result.Count);
+        Assert.Equal(10, result.First().CustomerId);
+        Assert.Equal(1, result.First().Rank);
+        
+        Assert.Equal(5, result.Last().CustomerId);
+    }
+    
+    [Fact]
+    public async Task GetCustomersById_WhenCustomersIsTheLast_ShouldNotHaveLowerNeighbours()
+    {
+        //Arrange
+        var shuffledCustomers = new ShuffledCustomersBuilder().WithNCustomers(10).Build();
+        _leaderboardService = new LeaderboardService(shuffledCustomers);
+        
+        //Act
+        var result = await _leaderboardService.GetCustomersById(1, 3, 5);
+        
+        //Assert
+        Assert.Equal(4, result.Count);
+        Assert.Equal(4, result.First().CustomerId);
+        Assert.Equal(7, result.First().Rank);
+        
+        Assert.Equal(1, result.Last().CustomerId);
+    }
+
+    [Fact]
+    public async Task GetCustomersById_WhenHighExceeds_ShouldReturnAllBeforeTargetCustomer()
+    {
+        //Arrange
+        var shuffledCustomers = new ShuffledCustomersBuilder().WithNCustomers(10).Build();
+        _leaderboardService = new LeaderboardService(shuffledCustomers);
+        
+        //Act
+        var result = await _leaderboardService.GetCustomersById(6, 8, 2);
+        
+        //Assert
+        Assert.Equal(7, result.Count);
+        Assert.Equal(10, result.First().CustomerId);
+        Assert.Equal(1, result.First().Rank);
+        
+        Assert.Equal(4, result.Last().CustomerId);
+    }
+    
+    [Fact]
+    public async Task GetCustomersById_WhenLowExceeds_ShouldReturnAllAfterTargetCustomer()
+    {
+        //Arrange
+        var shuffledCustomers = new ShuffledCustomersBuilder().WithNCustomers(10).Build();
+        _leaderboardService = new LeaderboardService(shuffledCustomers);
+        
+        //Act
+        var result = await _leaderboardService.GetCustomersById(2, 2, 5);
+        
+        //Assert
+        Assert.Equal(4, result.Count);
+        Assert.Equal(4, result.First().CustomerId);
+        Assert.Equal(7, result.First().Rank);
+        
+        Assert.Equal(1, result.Last().CustomerId);
+    }
+    
+    [Fact]
+    public async Task GetCustomersById_WhenHighAndLowWithinRange_ShouldReturnCorrectHighAndLowNeighbours()
+    {
+        //Arrange
+        var shuffledCustomers = new ShuffledCustomersBuilder().WithNCustomers(15).Build();
+        _leaderboardService = new LeaderboardService(shuffledCustomers);
+        
+        //Act
+        var result = await _leaderboardService.GetCustomersById(8, 3, 5);
+        
+        //Assert
+        Assert.Equal(9, result.Count);
+        Assert.Equal(11, result.First().CustomerId);
+        Assert.Equal(5, result.First().Rank);
+        
+        Assert.Equal(3, result.Last().CustomerId);
+    }
+    
+    
     #endregion
 }

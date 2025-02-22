@@ -1,22 +1,25 @@
-using EMLeaderboard.Services;
 using EMLeaderboard.Models;
+
 public class ShuffledCustomersBuilder{
     private readonly List<Customer> _newCustomers = new();
 
     public ShuffledCustomersBuilder WithNEqualScoreCustomers(int numberOfCustomers, decimal score){
+        var currentNumberOfCustomers = _newCustomers.Count;
         for(var i = 0; i < numberOfCustomers; i++){
             _newCustomers.Add(new Customer{
-                CustomerId = _newCustomers.Count + 1,
+                CustomerId = ++currentNumberOfCustomers,
                 Score = score
             });
         }
         return this;
     }
 
-    public ShuffledCustomersBuilder WithNCustomers(int numberOfCustomers, decimal scoreFrom = 1){
+    public ShuffledCustomersBuilder WithNCustomers(int numberOfCustomers, decimal scoreFrom = 1)
+    {
+        var currentNumberOfCustomers = _newCustomers.Count;
         for(var i = 0; i < numberOfCustomers; i++){
             _newCustomers.Add(new Customer{
-                CustomerId = _newCustomers.Count + 1,
+                CustomerId = ++currentNumberOfCustomers,
                 Score = scoreFrom++
             });
         }

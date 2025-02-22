@@ -6,7 +6,7 @@ namespace EMLeaderboard.Services;
 public class LeaderboardService : ILeaderboardService
 {
     private SortedSet<Customer> _sortedCustomers;
-    private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+    private readonly ReaderWriterLockSlim _lock = new ();
     private readonly Dictionary<long, Customer> _customers = new();
 
     private static readonly IComparer<Customer> CustomerScoreComparer = Comparer<Customer>.Create((x, y) =>
@@ -20,8 +20,9 @@ public class LeaderboardService : ILeaderboardService
         _sortedCustomers = new SortedSet<Customer>(CustomerScoreComparer);
     }
 
-    public LeaderboardService(IEnumerable<Customer> customers)
+    public LeaderboardService(List<Customer> customers)
     {
+        _customers = customers.ToDictionary((c)=>c.CustomerId);
         _sortedCustomers = new SortedSet<Customer>(customers, CustomerScoreComparer);
     }
 
@@ -99,10 +100,76 @@ public class LeaderboardService : ILeaderboardService
         }
     }
 
-    public Task<List<CustomerScoreRank>> GetCustomersById(long customerId, decimal? high, decimal? low)
+    public Task<List<CustomerScoreRank>> GetCustomersById(long customerId, int high = 0, int low = 0)
     {
-        // Method implementation goes here
-        throw new NotImplementedException();
+        
+        _lock.EnterReadLock();
+        try{
+            //Assumption: throw exception if customer is not found
+            if(!_customers.TryGetValue(customerId, out var customer)){
+                throw new CustomerNotFoundException(customerId);
+            }
+
+            if(high == 0 && low == 0){
+                return Task.FromResult(new List<CustomerScoreRank>{
+                    new CustomerScoreRank{
+                        CustomerId = customer.CustomerId,
+                        Score = customer.Score,
+                        Rank = 1
+                    }
+                });
+            }
+
+            var result = new List<CustomerScoreRank>();
+            var higherCustomersQueue = new Queue<CustomerScoreRank>(high);
+            var currentIndex = 1;
+            int  maxCustomerIndex = 0;
+
+            foreach(var c in _sortedCustomers)
+            {  
+                if(c.CustomerId == customerId){
+                    //when target found, add higher neighbours and itself
+                    result.AddRange(higherCustomersQueue);
+                    result.Add(new CustomerScoreRank{
+                        CustomerId = c.CustomerId,
+                        Score = c.Score,
+                        Rank = currentIndex
+                    });
+                    maxCustomerIndex = currentIndex + low;
+                }
+                else if(result.Count == 0)
+                {
+                    //when target not found, add current to higher neighbours queue and maintain the queue size
+                    if(higherCustomersQueue.Count == high){
+                        higherCustomersQueue.Dequeue();
+                    }
+                    higherCustomersQueue.Enqueue(new CustomerScoreRank{
+                        CustomerId = c.CustomerId,
+                        Score = c.Score,
+                        Rank = currentIndex
+                    });
+                }
+                else if(currentIndex <= maxCustomerIndex)
+                {
+                    //add lower neighbours after 
+                    result.Add(new CustomerScoreRank{
+                        CustomerId = c.CustomerId,
+                        Score = c.Score,
+                        Rank = currentIndex
+                    });
+                }
+                else{
+                    break;
+                }
+
+                currentIndex++;
+            }
+
+            return Task.FromResult(result);
+        }
+        finally{
+            _lock.ExitReadLock();
+        }
     }
 
     private Customer UpdateCustomerScore(Customer customer, decimal scoreChange){
