@@ -5,14 +5,25 @@ namespace EMLeaderboard.Services;
 
 public class LeaderboardService : ILeaderboardService
 {
+    private SortedSet<Customer> _sortedCustomers;
     private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
     private readonly Dictionary<long, Customer> _customers = new();
-    private readonly SortedSet<Customer> _sortedCustomers = new(Comparer<Customer>.Create((x, y) =>
+
+    private static readonly IComparer<Customer> CustomerScoreComparer = Comparer<Customer>.Create((x, y) =>
     {
         var scoreComparison = y.Score.CompareTo(x.Score);
         return scoreComparison != 0 ? scoreComparison : x.CustomerId.CompareTo(y.CustomerId);
-    }));
+    });
 
+    public LeaderboardService()
+    {
+        _sortedCustomers = new SortedSet<Customer>(CustomerScoreComparer);
+    }
+
+    public LeaderboardService(IEnumerable<Customer> customers)
+    {
+        _sortedCustomers = new SortedSet<Customer>(customers, CustomerScoreComparer);
+    }
 
     public Task<decimal> UpdateScoreAsync(long customerId, decimal scoreChange)
     {
