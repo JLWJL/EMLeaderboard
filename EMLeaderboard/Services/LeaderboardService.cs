@@ -1,11 +1,13 @@
 using EMLeaderboard.Contracts;
 using EMLeaderboard.Models;
+using EMLeaderboard.Models.Exceptions;
 
 namespace EMLeaderboard.Services;
 
 public class LeaderboardService : ILeaderboardService
 {
     private SortedSet<Customer> _sortedCustomers;
+    //TODO: inject data source?
     private readonly ReaderWriterLockSlim _lock = new ();
     private readonly Dictionary<long, Customer> _customers = new();
 
@@ -28,6 +30,13 @@ public class LeaderboardService : ILeaderboardService
 
     public Task<decimal> UpdateScoreAsync(long customerId, decimal scoreChange)
     {
+        if(customerId < 1){
+            throw new ArgumentException("Customer ID must be greater than 0");
+        }
+
+        if(scoreChange < -1000 || scoreChange > 1000){
+            throw new ArgumentException("Score must be between -1000 and 1000");
+        }
 
         _lock.EnterWriteLock();
         try{
@@ -68,7 +77,7 @@ public class LeaderboardService : ILeaderboardService
     public Task<List<CustomerScoreRank>> GetCustomersByRankAsync(int start = 1, int? end = null)
     {
         //Assumption: if start and end are missing, retrieve top 10 customers
-        if(end is null || end < start){
+        if(end is null || end == 0){
             end = start + 9;
         }
 
@@ -110,16 +119,6 @@ public class LeaderboardService : ILeaderboardService
                 throw new CustomerNotFoundException(customerId);
             }
 
-            if(high == 0 && low == 0){
-                return Task.FromResult(new List<CustomerScoreRank>{
-                    new CustomerScoreRank{
-                        CustomerId = customer.CustomerId,
-                        Score = customer.Score,
-                        Rank = 1
-                    }
-                });
-            }
-
             var result = new List<CustomerScoreRank>();
             var higherCustomersQueue = new Queue<CustomerScoreRank>(high);
             var currentIndex = 1;
@@ -137,7 +136,7 @@ public class LeaderboardService : ILeaderboardService
                     });
                     maxCustomerIndex = currentIndex + low;
                 }
-                else if(result.Count == 0)
+                else if(result.Count == 0 && high != 0 )
                 {
                     //when target not found, add current to higher neighbours queue and maintain the queue size
                     if(higherCustomersQueue.Count == high){
@@ -157,9 +156,6 @@ public class LeaderboardService : ILeaderboardService
                         Score = c.Score,
                         Rank = currentIndex
                     });
-                }
-                else{
-                    break;
                 }
 
                 currentIndex++;

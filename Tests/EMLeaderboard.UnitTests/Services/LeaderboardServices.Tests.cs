@@ -260,6 +260,22 @@ public class LeaderboardServicesTests
         
         Assert.Equal(1, result.Last().CustomerId);
     }
+
+    [Fact]
+    public async Task GetCustomersById_WhenZeroHighAndLow_ShouldReturnTargetCustomer()
+    {
+        //Arrange
+        var shuffledCustomers = new ShuffledCustomersBuilder().WithNCustomers(10).Build();
+        _leaderboardService = new LeaderboardService(shuffledCustomers);
+        
+        //Act
+        var result = await _leaderboardService.GetCustomersByIdAsync(2);
+        
+        //Assert
+        Assert.Single(result);
+        Assert.Equal(2, result.First().CustomerId);
+        Assert.Equal(9, result.First().Rank);
+    }
     
     [Fact]
     public async Task GetCustomersById_WhenHighAndLowWithinRange_ShouldReturnCorrectHighAndLowNeighbours()
@@ -278,7 +294,5 @@ public class LeaderboardServicesTests
         
         Assert.Equal(3, result.Last().CustomerId);
     }
-    
-    
     #endregion
 }
