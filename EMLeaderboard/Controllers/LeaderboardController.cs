@@ -36,12 +36,16 @@ public class LeaderboardController : ControllerBase
 
     [HttpGet]
     [Route("")]
-    //TODO: return type is {customerid, score, rank}
-    public async Task<ActionResult<List<CustomerScoreRank>>> GetCustomersByRank([FromQuery] int start, [FromQuery] int end)
+    public async Task<ActionResult<List<CustomerScoreRank>>> GetCustomersByRank([FromQuery] int start = 1, [FromQuery] int? end = null)
     {
         if (start < 0 || end < 0 || start > end)
         {
             return BadRequest("Invalid start or end");
+        }
+        
+        //Assumption: if start and end are missing, retrieve top 10 customers
+        if(end is null){
+            end = start + 9;
         }
 
         var result = await _leaderboardService.GetCustomersByRankAsync(start, end);
