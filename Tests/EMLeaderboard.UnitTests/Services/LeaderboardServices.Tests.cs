@@ -167,6 +167,13 @@ public class LeaderboardServicesTests
             Assert.True(equalScoreCustomers[i-1].CustomerId < equalScoreCustomers[i].CustomerId);
         }
     }
+
+    [Fact]
+    public async Task GetCustomersByRank_WhenStartNonExisting_ShouldReturnEmptyList()
+    {
+        var result = await _leaderboardService.GetCustomersByRankAsync(10);
+        Assert.Empty(result);
+    }
     #endregion
 
     #region GetCustomersById
