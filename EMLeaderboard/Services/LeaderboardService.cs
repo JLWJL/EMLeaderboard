@@ -168,13 +168,12 @@ public class LeaderboardService : ILeaderboardService
         }
     }
 
-    private Customer UpdateCustomerScore(Customer customer, decimal scoreChange){
+    private void UpdateCustomerScore(Customer customer, decimal scoreChange){
         var newScore = customer.Score + scoreChange;
         if(newScore <= 0){
             customer.Score = 0;
         }else{
             customer.Score = newScore;
         }
-        return customer;
     }
 } 
