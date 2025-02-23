@@ -1,5 +1,7 @@
 using EMLeaderboard.Models;
 
+namespace EMLeaderboard.UnitTests.Helpers;
+
 public class ShuffledCustomersBuilder{
     private readonly List<Customer> _newCustomers = new();
 

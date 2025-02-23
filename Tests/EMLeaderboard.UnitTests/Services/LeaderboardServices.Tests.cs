@@ -1,4 +1,8 @@
+using EMLeaderboard.Models.Exceptions;
 using EMLeaderboard.Services;
+using EMLeaderboard.UnitTests.Helpers;
+
+namespace EMLeaderboard.UnitTests.Services;
 
 public class LeaderboardServicesTests
 {
