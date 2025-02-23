@@ -76,7 +76,7 @@ public class LeaderboardService : ILeaderboardService
 
     public Task<List<CustomerScoreRank>> GetCustomersByRankAsync(int start = 1, int? end = null)
     {
-        //Assumption: if start and end are missing, retrieve top 10 customers
+        //Assumption: if end is missing, retrieve 10 customers
         if(end is null || end == 0){
             end = start + 9;
         }
@@ -115,7 +115,7 @@ public class LeaderboardService : ILeaderboardService
         _lock.EnterReadLock();
         try{
             //Assumption: throw exception if customer is not found
-            if(!_customers.TryGetValue(customerId, out var customer)){
+            if(!_customers.TryGetValue(customerId, out _)){
                 throw new CustomerNotFoundException(customerId);
             }
 
