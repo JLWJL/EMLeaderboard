@@ -120,45 +120,45 @@ public class LeaderboardService : ILeaderboardService
             }
 
             var result = new List<CustomerScoreRank>();
-            var higherCustomersQueue = new Queue<CustomerScoreRank>(high);
-            var currentIndex = 1;
+            var higherNeibours = new Queue<CustomerScoreRank>(high);
+            var currentRank = 1;
             int  maxCustomerIndex = 0;
 
             foreach(var c in _sortedCustomers)
             {  
                 if(c.CustomerId == customerId){
                     //when target found, add higher neighbours and itself
-                    result.AddRange(higherCustomersQueue);
+                    result.AddRange(higherNeibours);
                     result.Add(new CustomerScoreRank{
                         CustomerId = c.CustomerId,
                         Score = c.Score,
-                        Rank = currentIndex
+                        Rank = currentRank
                     });
-                    maxCustomerIndex = currentIndex + low;
+                    maxCustomerIndex = currentRank + low;
                 }
                 else if(result.Count == 0 && high != 0 )
                 {
                     //when target not found, add current to higher neighbours queue and maintain the queue size
-                    if(higherCustomersQueue.Count == high){
-                        higherCustomersQueue.Dequeue();
+                    if(higherNeibours.Count == high){
+                        higherNeibours.Dequeue();
                     }
-                    higherCustomersQueue.Enqueue(new CustomerScoreRank{
+                    higherNeibours.Enqueue(new CustomerScoreRank{
                         CustomerId = c.CustomerId,
                         Score = c.Score,
-                        Rank = currentIndex
+                        Rank = currentRank
                     });
                 }
-                else if(currentIndex <= maxCustomerIndex)
+                else if(currentRank <= maxCustomerIndex)
                 {
                     //add lower neighbours after 
                     result.Add(new CustomerScoreRank{
                         CustomerId = c.CustomerId,
                         Score = c.Score,
-                        Rank = currentIndex
+                        Rank = currentRank
                     });
                 }
 
-                currentIndex++;
+                currentRank++;
             }
 
             return Task.FromResult(result);
