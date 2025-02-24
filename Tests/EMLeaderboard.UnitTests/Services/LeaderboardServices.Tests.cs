@@ -70,6 +70,7 @@ public class LeaderboardServicesTests
 
         // Assert
         Assert.Equal(initialScore + scoreChange, result);
+    }
     #endregion
 
     #region GetCustomersByRank
