@@ -2,7 +2,6 @@
 using EMLeaderboard.Controllers;
 using EMLeaderboard.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.TestPlatform.Common.Utilities;
 using Moq;
 
 namespace EMLeaderboard.UnitTests.Controllers;
