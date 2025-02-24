@@ -295,5 +295,20 @@ public class LeaderboardServicesTests
         
         Assert.Equal(3, result.Last().CustomerId);
     }
+
+    [Theory]
+    [InlineData(-1, 4)]
+    [InlineData(3, -5)]
+    public async Task GetCustomersByIdAsync_WhenHighNeighborCountIsNegative_ThrowsArgumentException(int high, int low)
+    {
+        // Arrange
+        long customerId = 1;
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+            () => _leaderboardService.GetCustomersByIdAsync(customerId, high, low));
+        
+        Assert.Equal("'high' or 'low' cannot be negative", exception.Message);
+    }
     #endregion
 }

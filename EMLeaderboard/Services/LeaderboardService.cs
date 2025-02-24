@@ -7,7 +7,6 @@ namespace EMLeaderboard.Services;
 public class LeaderboardService : ILeaderboardService
 {
     private SortedSet<Customer> _sortedCustomers;
-    //TODO: inject data source?
     private readonly ReaderWriterLockSlim _lock = new ();
     private readonly Dictionary<long, Customer> _customers = new();
 
@@ -111,7 +110,8 @@ public class LeaderboardService : ILeaderboardService
 
     public Task<List<CustomerScoreRank>> GetCustomersByIdAsync(long customerId, int high = 0, int low = 0)
     {
-        
+        if (high < 0 || low < 0) throw new ArgumentException("'high' or 'low' cannot be negative");
+   
         _lock.EnterReadLock();
         try{
             //Assumption: throw exception if customer is not found
